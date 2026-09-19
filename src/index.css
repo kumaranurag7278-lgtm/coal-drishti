@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-steel-50 font-sans text-coal-800 antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid theme('colors.primary.500');
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* Form input used on the login screen. 48px tall for touch. */
+  .field {
+    @apply h-12 w-full rounded border border-steel-300 bg-white px-3 text-base text-coal-900 placeholder:text-steel-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded font-medium transition-colors disabled:cursor-not-allowed;
+  }
+  .btn-primary {
+    @apply btn bg-primary-600 text-white hover:bg-primary-700 disabled:bg-steel-200 disabled:text-steel-500;
+  }
+  .btn-secondary {
+    @apply btn border border-steel-300 bg-white text-coal-800 hover:border-steel-400 hover:bg-steel-50;
+  }
+  /* Hide scrollbar for the horizontal role chips on mobile */
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
