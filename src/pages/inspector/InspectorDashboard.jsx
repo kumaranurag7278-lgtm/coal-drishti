@@ -12,27 +12,17 @@ import {
   TriangleAlert,
   Upload,
 } from 'lucide-react';
-import { Link, useOutletContext } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { RiskMeter, SeverityBadge, StatusBadge } from '../../components/Badge.jsx';
 import Panel from '../../components/Panel.jsx';
 import TopoBackdrop from '../../components/TopoBackdrop.jsx';
-import {
-  ALERTS,
-  HIGH_RISK_THRESHOLD,
-  INSPECTIONS,
-  INSPECTOR,
-  NEXT_INSPECTION,
-  TASKS,
-  VIOLATIONS,
-} from '../../data/inspectorMock.js';
+import { useInspectorStore } from '../../context/InspectorStore.jsx';
 import { useSession } from '../../context/SessionContext.jsx';
+import { ALERTS, HIGH_RISK_THRESHOLD, INSPECTOR, SCHEDULED, scheduledDue, TASKS } from '../../data/inspectorMock.js';
+import { draftAsInspection, draftSummary } from '../../data/summary.js';
+import { formatTime, formatWhen, isSameDay, plural } from '../../lib/format.js';
 
-const CATEGORY_ICON = {
-  PPE: HardHat,
-  'HEMM / Machinery': Cog,
-  'Haul Roads': Route,
-  'Workplace Safety': ShieldCheck,
-};
+const ZONE_ICON = { 'Pit A': Cog, 'Pit B': HardHat, 'Haul Road': Route, Stockyard: ShieldCheck };
 
 const ALERT_STYLE = {
   danger: { icon: ShieldAlert, box: 'border-danger bg-danger-soft/60', text: 'text-danger' },
@@ -66,24 +56,29 @@ function Kpi({ to, label, value, note, icon: Icon, tone = 'text-coal-900' }) {
 }
 
 export default function InspectorDashboard() {
-  const { sync } = useOutletContext();
   const { user } = useSession();
+  const store = useInspectorStore();
 
-  // A queued inspection becomes "Submitted" once the simulated sync completes.
-  const synced = sync.pending === 0;
-  const inspections = INSPECTIONS.map((i) =>
-    i.status === 'Pending submission' && synced ? { ...i, status: 'Submitted' } : i,
-  );
+  const todays = store.inspections.filter((i) => isSameDay(i.startTime));
+  const draft = store.draft && isSameDay(store.draft.startTime) ? store.draft : null;
+  const zoneDone = [...todays.map((i) => i.zoneId), draft?.zoneId].includes(SCHEDULED.zoneId);
+  const scheduledLeft = zoneDone ? 0 : 1;
+  const due = scheduledDue();
+  const startScheduled = `/inspector/start-inspection?zone=${SCHEDULED.zoneId}&category=${SCHEDULED.categoryId}`;
 
-  // The "submit report" task is done once the queued report syncs.
-  const tasks = TASKS.filter((t) => !(t.ref === 'INS-0414' && synced));
-
-  const open = VIOLATIONS.filter((v) => v.status !== 'Verified');
+  const open = store.violations.filter((v) => v.status !== 'Verified');
   const notAssigned = open.filter((v) => v.status === 'Open').length;
-  const highRisk = open.filter((v) => v.risk >= HIGH_RISK_THRESHOLD).length;
-  const pendingSubmissions = inspections.filter((i) => i.status === 'Pending submission').length;
-  const submitted = inspections.filter((i) => i.status === 'Submitted').length;
-  const notStarted = inspections.filter((i) => i.status === 'Not started').length;
+  const highRisk = open.filter((v) => v.riskScore.score >= HIGH_RISK_THRESHOLD).length;
+  const queued = store.inspections.filter((i) => i.syncStatus === 'pending');
+  const pendingSubmissions = queued.length + (store.draft ? 1 : 0);
+  const submittedToday = todays.filter((i) => i.status === 'Submitted').length;
+
+  const tasks = [
+    ...TASKS,
+    ...(queued.length
+      ? [{ id: 'sync', title: `Sync ${plural(queued.length, 'inspection')} when back online`, ref: queued[0].id, due: 'When back online', priority: 'Medium' }]
+      : []),
+  ];
 
   const today = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' });
 
@@ -119,17 +114,17 @@ export default function InspectorDashboard() {
           <div>
             <p className="text-sm text-steel-300">Next scheduled inspection</p>
             <p className="mt-1 font-display text-3xl font-semibold leading-none">
-              {NEXT_INSPECTION.zone}, {NEXT_INSPECTION.category}
+              {scheduledLeft ? `${SCHEDULED.zone}, ${SCHEDULED.category}` : 'Nothing else scheduled today'}
             </p>
             <p className="mt-2 text-sm text-steel-300">
-              Due {NEXT_INSPECTION.due}. {NEXT_INSPECTION.checks} checks.
+              {scheduledLeft ? `Due ${formatTime(due)}. ${SCHEDULED.checks} checks.` : 'You can still start an unscheduled inspection.'}
             </p>
           </div>
           <Link
             to="/inspector/start-inspection"
             className="inline-flex h-14 items-center justify-center gap-2.5 rounded bg-white px-8 text-lg font-semibold text-coal-950 transition-colors hover:bg-primary-50 md:shrink-0"
           >
-            <Plus size={22} strokeWidth={2.5} className="text-primary-600" />
+            <Plus size={22} strokeWidth={2.5} className="text-brand-dark" />
             Start inspection
           </Link>
         </div>
@@ -142,8 +137,8 @@ export default function InspectorDashboard() {
         <Kpi
           to="/inspector/my-inspections"
           label="Today's inspections"
-          value={inspections.length}
-          note={`${submitted} submitted, ${pendingSubmissions} pending, ${notStarted} not started`}
+          value={todays.length + (draft ? 1 : 0) + scheduledLeft}
+          note={`${submittedToday} submitted, ${pendingSubmissions} pending, ${scheduledLeft} not started`}
           icon={ClipboardList}
         />
         <Kpi
@@ -165,7 +160,7 @@ export default function InspectorDashboard() {
           to="/inspector/my-inspections"
           label="Pending submissions"
           value={pendingSubmissions}
-          note={pendingSubmissions ? 'Queued until you are back online' : 'Everything is submitted'}
+          note={pendingSubmissions ? 'Drafts or queued for sync' : 'Everything is submitted'}
           icon={Upload}
           tone={pendingSubmissions ? 'text-warn' : 'text-ok'}
         />
@@ -182,39 +177,66 @@ export default function InspectorDashboard() {
             }
           >
             <ul className="divide-y divide-steel-200">
-              {inspections.map((i) => {
-                const Icon = CATEGORY_ICON[i.category] ?? ClipboardList;
-                const queued = i.status === 'Pending submission';
+              {draft && (
+                <li className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3.5">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded bg-steel-100 text-steel-700">
+                    <ClipboardList size={20} />
+                  </span>
+                  <div className="min-w-0 flex-1 basis-40">
+                    <p className="font-medium text-coal-900">{draftAsInspection(draft).zone}, draft {draft.id}</p>
+                    <p className="text-sm text-steel-500">
+                      Started {formatTime(draft.startTime)}, {plural(draftSummary(draft).violationCount, 'finding')} so far
+                    </p>
+                  </div>
+                  <StatusBadge status="Draft" />
+                  <Link to="/inspector/start-inspection" className="btn-primary h-10 px-4 text-sm">
+                    Resume
+                  </Link>
+                </li>
+              )}
+              {todays.map((i) => {
+                const Icon = ZONE_ICON[i.zone] ?? ClipboardList;
+                const found = i.violationIds.length;
                 return (
-                  <li key={i.id} className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3.5">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded bg-steel-100 text-steel-700">
-                      <Icon size={20} />
-                    </span>
-                    <div className="min-w-0 flex-1 basis-40">
-                      <p className="font-medium text-coal-900">
-                        {i.zone}, {i.category}
-                      </p>
-                      <p className="text-sm text-steel-500">
-                        {i.status === 'Not started' ? `Due ${i.time}` : i.time}
-                        {i.status !== 'Not started' && (
-                          <>
-                            {', '}
-                            {i.findings === 0
-                              ? 'no findings'
-                              : `${i.findings} finding${i.findings > 1 ? 's' : ''}${queued ? ', queued for sync' : ''}`}
-                          </>
-                        )}
-                      </p>
-                    </div>
-                    <StatusBadge status={i.status} />
-                    {i.status === 'Not started' && (
-                      <Link to="/inspector/start-inspection" className="btn-primary h-10 px-4 text-sm">
-                        Start
-                      </Link>
-                    )}
+                  <li key={i.id}>
+                    <Link to={`/inspector/my-inspections/${i.id}`} className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3.5 hover:bg-steel-50">
+                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded bg-steel-100 text-steel-700">
+                        <Icon size={20} />
+                      </span>
+                      <div className="min-w-0 flex-1 basis-40">
+                        <p className="font-medium text-coal-900">
+                          {i.zone}, <span className="tabular-nums">{i.id}</span>
+                        </p>
+                        <p className="text-sm text-steel-500">
+                          {formatTime(i.startTime)}, {found === 0 ? 'no findings' : plural(found, 'finding')}
+                          {i.syncStatus === 'pending' ? ', queued for sync' : ''}
+                        </p>
+                      </div>
+                      <div className="flex gap-1.5">
+                        <StatusBadge status={i.status} />
+                        {i.syncStatus === 'pending' && <StatusBadge status="Sync pending" />}
+                      </div>
+                    </Link>
                   </li>
                 );
               })}
+              {scheduledLeft > 0 && (
+                <li className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3.5">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded bg-steel-100 text-steel-700">
+                    <Cog size={20} />
+                  </span>
+                  <div className="min-w-0 flex-1 basis-40">
+                    <p className="font-medium text-coal-900">
+                      {SCHEDULED.zone}, {SCHEDULED.category}
+                    </p>
+                    <p className="text-sm text-steel-500">Due {formatTime(due)}</p>
+                  </div>
+                  <StatusBadge status="Not started" />
+                  <Link to={startScheduled} className="btn-primary h-10 px-4 text-sm">
+                    Start
+                  </Link>
+                </li>
+              )}
             </ul>
           </Panel>
 
@@ -227,23 +249,25 @@ export default function InspectorDashboard() {
             }
           >
             <ul className="divide-y divide-steel-200">
-              {VIOLATIONS.slice(0, 5).map((v) => (
-                <li
-                  key={v.id}
-                  className="px-4 py-3.5 md:grid md:grid-cols-[3.75rem_minmax(0,1fr)_4.75rem_6rem_9.5rem] md:items-center md:justify-items-start md:gap-x-4"
-                >
-                  <span className="text-sm font-semibold tabular-nums text-primary-700">{v.id}</span>
-                  <div className="min-w-0">
-                    <p className="font-medium text-coal-900">{v.title}</p>
-                    <p className="text-sm text-steel-500">
-                      {v.zone}, {v.reported}
-                    </p>
-                  </div>
-                  <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-2 md:contents">
-                    <SeverityBadge level={v.severity} />
-                    <RiskMeter score={v.risk} />
-                    <StatusBadge status={v.status} />
-                  </div>
+              {store.violations.slice(0, 5).map((v) => (
+                <li key={v.id}>
+                  <Link
+                    to={`/inspector/my-violations/${v.id}`}
+                    className="block px-4 py-3.5 hover:bg-steel-50 md:grid md:grid-cols-[5.5rem_minmax(0,1fr)_4.75rem_6rem_9.5rem] md:items-center md:justify-items-start md:gap-x-4"
+                  >
+                    <span className="text-sm font-semibold tabular-nums text-primary-700">{v.id}</span>
+                    <div className="min-w-0">
+                      <p className="font-medium text-coal-900">{v.finding}</p>
+                      <p className="text-sm text-steel-500">
+                        {v.location}, {formatWhen(v.timestamp)}
+                      </p>
+                    </div>
+                    <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-2 md:contents">
+                      <SeverityBadge level={v.severity} />
+                      <RiskMeter score={v.riskScore.score} />
+                      <StatusBadge status={v.status} />
+                    </div>
+                  </Link>
                 </li>
               ))}
             </ul>

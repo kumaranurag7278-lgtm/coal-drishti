@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/coalcraft-ai.iml" filepath="$PROJECT_DIR$/.idea/coalcraft-ai.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/coal-drishti-phase2.iml" filepath="$PROJECT_DIR$/.idea/coal-drishti-phase2.iml" />
     </modules>
   </component>
 </project>

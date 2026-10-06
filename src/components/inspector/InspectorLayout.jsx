@@ -1,13 +1,16 @@
 import { Bell, ChevronDown, LogOut, MapPin, Plus, User } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useRef, useState } from 'react';
+import { Link, NavLink, Outlet, useMatch, useNavigate } from 'react-router-dom';
+import InstallButton from '../InstallButton.jsx';
 import { LogoMark } from '../Logo.jsx';
 import { BRAND } from '../../config/brand.js';
 import { useSession } from '../../context/SessionContext.jsx';
 import { INSPECTOR } from '../../data/inspectorMock.js';
 import useDismiss from '../../hooks/useDismiss.js';
 import { INSPECTOR_NAV } from './nav.js';
+import OfflineBanner from './OfflineBanner.jsx';
 import SyncStatus from './SyncStatus.jsx';
+import TopNavRoleSwitcher from '../TopNavRoleSwitcher.jsx';
 
 function ProfileMenu({ onLogout }) {
   const [open, setOpen] = useState(false);
@@ -34,9 +37,9 @@ function ProfileMenu({ onLogout }) {
       {open && (
         <div role="menu" className="absolute right-0 top-12 z-40 w-56 rounded-md border border-steel-200 bg-white py-1 text-coal-800 shadow-lg">
           <div className="border-b border-steel-200 px-3 py-2.5">
-            <p className="text-sm font-semibold text-coal-900">{INSPECTOR.title}</p>
+            <p className="text-sm font-semibold text-coal-900">{INSPECTOR.name}</p>
             <p className="text-xs text-steel-500">
-              {user?.empId}, {user?.org}
+              {INSPECTOR.title}, {user?.empId}, {user?.org}
             </p>
           </div>
           <Link
@@ -113,16 +116,9 @@ function BottomNav() {
 export default function InspectorLayout() {
   const { user, signOut } = useSession();
   const navigate = useNavigate();
-  const [sync, setSync] = useState({ offline: true, pending: 2, syncing: false });
-  const timer = useRef();
+  // The wizard has its own sticky action bar, so the bottom tab bar steps aside.
+  const inWizard = Boolean(useMatch('/inspector/start-inspection'));
 
-  useEffect(() => () => clearTimeout(timer.current), []);
-
-  const reconnect = () => {
-    setSync((s) => ({ ...s, syncing: true }));
-    timer.current = setTimeout(() => setSync({ offline: false, pending: 0, syncing: false }), 1400);
-  };
-  const goOffline = () => setSync({ offline: true, pending: 0, syncing: false });
   const logout = () => {
     signOut();
     navigate('/');
@@ -143,12 +139,13 @@ export default function InspectorLayout() {
             <MapPin size={15} className="text-steel-300" />
             {user?.org}
           </span>
-          <span className="hidden rounded-sm bg-white/10 px-2 py-1 text-xs font-medium leading-none md:inline">
-            Field Inspector
-          </span>
+          <TopNavRoleSwitcher currentRoleId="inspector" />
 
           <div className="ml-auto flex items-center gap-1 sm:gap-2">
-            <SyncStatus sync={sync} onReconnect={reconnect} onGoOffline={goOffline} />
+            <div className="hidden empty:hidden md:block">
+              <InstallButton variant="dark" />
+            </div>
+            <SyncStatus />
             <Link
               to="/inspector/alerts"
               aria-label="Notifications, 3 unread"
@@ -170,6 +167,7 @@ export default function InspectorLayout() {
             </button>
           </div>
         </div>
+        <OfflineBanner />
       </header>
 
       <div className="lg:grid lg:grid-cols-[15rem_minmax(0,1fr)]">
@@ -206,12 +204,12 @@ export default function InspectorLayout() {
           </p>
         </aside>
 
-        <main className="min-w-0 px-4 pb-28 pt-5 lg:px-8 lg:pb-10 lg:pt-8">
-          <Outlet context={{ sync }} />
+        <main className={`min-w-0 px-4 pt-5 lg:px-8 lg:pb-10 lg:pt-8 ${inWizard ? 'pb-0' : 'pb-28'}`}>
+          <Outlet />
         </main>
       </div>
 
-      <BottomNav />
+      {!inWizard && <BottomNav />}
     </div>
   );
 }

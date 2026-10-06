@@ -37,6 +37,10 @@ export default {
           700: '#1C4C80',
         },
         // Meaning colours: green = verified/safe, amber = pending, red = critical
+        // Brand accent (hi-vis amber). Used sparingly: logo, install prompt, key highlights.
+        brand: { DEFAULT: '#F2A900', dark: '#B57F00' },
+        // HIGH severity: orange, one step below CRITICAL red
+        hi: { DEFAULT: '#A63F00', soft: '#FDEBDD', line: '#F2B27A', bar: '#E8590C' },
         ok: { DEFAULT: '#1F7A4D', soft: '#E3F2E9', line: '#B7DDC5' },
         warn: { DEFAULT: '#8A5100', soft: '#FCF0D6', line: '#F0D08A', bar: '#D99A1B', on: '#F5C15D' },
         danger: { DEFAULT: '#B3261E', soft: '#FBE5E3', line: '#EFB5B0' },

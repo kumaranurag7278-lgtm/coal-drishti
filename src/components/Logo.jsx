@@ -1,15 +1,17 @@
 import { BRAND } from '../config/brand.js';
 
-// Three offset ellipses: the benches of an open-cast pit seen from above.
+// The eye ("drishti" means sight). The offset rings in the pupil are the
+// benches of an open-cast pit seen from above.
 export function LogoMark({ size = 32 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-      <rect width="32" height="32" rx="6" fill="#2F72B8" />
-      <g fill="none" stroke="#fff" strokeWidth="1.6">
-        <ellipse cx="16" cy="17" rx="11" ry="8.5" opacity=".5" />
-        <ellipse cx="16.6" cy="17.4" rx="7.6" ry="5.8" opacity=".75" />
-        <ellipse cx="17.2" cy="17.8" rx="4.2" ry="3.1" />
+      <rect width="32" height="32" rx="7" fill="#151B20" stroke="#3A4650" />
+      <g fill="none" stroke="#F2A900">
+        <path d="M3 16c4.5-6 9-8.5 13-8.5s8.5 2.5 13 8.5c-4.5 6-9 8.5-13 8.5S7.5 22 3 16Z" strokeWidth="1.5" strokeLinejoin="round" />
+        <circle cx="16" cy="16" r="5.5" strokeWidth="1" opacity=".55" />
+        <circle cx="16.4" cy="16.4" r="3.6" strokeWidth="1" opacity=".8" />
       </g>
+      <circle cx="16.8" cy="16.8" r="1.7" fill="#F2A900" />
     </svg>
   );
 }

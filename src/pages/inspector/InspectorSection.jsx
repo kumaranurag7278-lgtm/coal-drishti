@@ -2,17 +2,14 @@ import { ArrowLeft } from 'lucide-react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { INSPECTOR_NAV } from '../../components/inspector/nav.js';
 
-// Holding page for screens that are built in later steps of the prototype.
+// Holding page for Assigned Tasks and Alerts, which come in a later phase.
 export default function InspectorSection() {
   const { section } = useParams();
   const item = INSPECTOR_NAV.find((n) => n.slug === section && n.slug !== '');
   if (!item) return <Navigate to="/inspector" replace />;
   const Icon = item.icon;
 
-  const body =
-    item.slug === 'start-inspection'
-      ? 'The step-by-step workflow (mine, work zone, category, then the checklist) is built in the next step of the prototype.'
-      : `${item.label} is built in a later step of the prototype. Navigation is mock for now.`;
+  const body = `${item.label} is built in a later step of the prototype. The dashboard already shows a summary.`;
 
   return (
     <div className="mx-auto max-w-md py-12 text-center">

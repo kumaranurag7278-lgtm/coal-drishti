@@ -47,14 +47,21 @@ export default function RoleSelect() {
   const { selectedRoleId, setSelectedRoleId } = useSession();
   const selected = getRole(selectedRoleId);
 
+
   return (
     <AccessShell
-      mobileExtra={<p className="max-w-xs text-sm leading-snug text-steel-300">{BRAND.tagline}</p>}
+      mobileExtra={
+        <>
+          <p className="font-display text-3xl font-semibold leading-none">{BRAND.tagline}</p>
+          <p className="mt-2 max-w-xs text-sm leading-snug text-steel-300">{BRAND.supporting}</p>
+        </>
+      }
       panel={
         <>
           <h2 className="mt-16 max-w-md font-display text-5xl font-semibold leading-[1.04] xl:text-6xl">
             {BRAND.tagline}
           </h2>
+          <p className="mt-5 max-w-sm text-steel-300">{BRAND.supporting}</p>
           <div className="mt-auto pb-10">
             <LifecycleStrip />
           </div>
@@ -103,12 +110,14 @@ export default function RoleSelect() {
               onClick={() => navigate(`/login/${selected.id}`)}
               className="btn-primary h-12 shrink-0 px-6 text-base"
             >
-              Continue
+              Continue to Login
               <ArrowRight size={18} />
             </button>
+
           </div>
         </div>
       </div>
     </AccessShell>
   );
 }
+

@@ -8,7 +8,7 @@ import {
   Truck,
 } from 'lucide-react';
 
-const MINES = ['Mine A', 'Mine B', 'Mine C'];
+export const MINES = ['Mine A', 'Mine B', 'Mine C'];
 const REGIONS = ['Region East', 'Region Central', 'Region West'];
 
 /**
@@ -42,8 +42,8 @@ export const ROLES = [
     idHint: 'e.g. SUP-001',
     orgLabel: 'Mine',
     orgOptions: MINES,
-    phase: 'building',
-    home: '/workspace/supervisor',
+    phase: 'ready',
+    home: '/supervisor',
     demo: { id: 'SUP-001', password: 'demo123', org: 'Mine A' },
   },
   {
@@ -56,8 +56,8 @@ export const ROLES = [
     idHint: 'e.g. SAF-001',
     orgLabel: 'Mine',
     orgOptions: MINES,
-    phase: 'later',
-    home: '/workspace/safety',
+    phase: 'ready',
+    home: '/safety',
     demo: { id: 'SAF-001', password: 'demo123', org: 'Mine A' },
   },
   {
@@ -70,8 +70,8 @@ export const ROLES = [
     idHint: 'e.g. MGR-001',
     orgLabel: 'Mine',
     orgOptions: MINES,
-    phase: 'building',
-    home: '/workspace/manager',
+    phase: 'ready',
+    home: '/manager',
     demo: { id: 'MGR-001', password: 'demo123', org: 'Mine A' },
   },
   {
@@ -84,8 +84,8 @@ export const ROLES = [
     idHint: 'e.g. CON-001',
     orgLabel: 'Mine',
     orgOptions: MINES,
-    phase: 'later',
-    home: '/workspace/contractor',
+    phase: 'ready',
+    home: '/contractor',
     demo: { id: 'CON-001', password: 'demo123', org: 'Mine A' },
   },
   {
@@ -98,8 +98,8 @@ export const ROLES = [
     idHint: 'e.g. COR-001',
     orgLabel: 'Region',
     orgOptions: REGIONS,
-    phase: 'later',
-    home: '/workspace/corporate',
+    phase: 'ready',
+    home: '/corporate',
     demo: { id: 'COR-001', password: 'demo123', org: 'Region East' },
   },
   {
@@ -112,8 +112,8 @@ export const ROLES = [
     idHint: 'e.g. DGM-001',
     orgLabel: 'Jurisdiction',
     orgOptions: REGIONS,
-    phase: 'later',
-    home: '/workspace/dgms',
+    phase: 'ready',
+    home: '/dgms',
     demo: { id: 'DGM-001', password: 'demo123', org: 'Region East' },
   },
 ];

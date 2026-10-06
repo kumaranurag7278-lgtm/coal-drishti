@@ -65,7 +65,7 @@ export default function TopoBackdrop({
         ))}
       </g>
       {showRamp && (
-        <path d={spiral} fill="none" stroke="#8DB8E6" strokeOpacity=".45" strokeWidth="2.2" strokeDasharray="1 7" strokeLinecap="round" />
+        <path d={spiral} fill="none" stroke="#F2A900" strokeOpacity=".5" strokeWidth="2.2" strokeDasharray="1 7" strokeLinecap="round" />
       )}
     </svg>
   );

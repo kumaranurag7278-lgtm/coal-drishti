@@ -1,57 +1,113 @@
-# COALCRAFT AI: frontend prototype (phase 1)
+# COAL DRISHTI
 
-Smart Mine Governance & Compliance Platform. SIH 2026, SIH26024.
-Frontend only. Mock data, no backend, no real authentication, no real AI.
+**AI-Powered Smart Governance & Monitoring for Coal Mines**
+*From Mine Data to Verified Action*
 
-## Run
+Smart India Hackathon 2026 · Problem statement **SIH26024**: *AI-Based Smart Governance and Compliance Monitoring System for Coal Mines* · Theme: Smart Automation · Category: Software · Team: Samosa Chutney
 
-```bash
-npm install
-npm run dev        # http://localhost:5173
-npm run build      # production build in dist/
+> **Frontend Prototype:** All data is local mock storage (`localStorage['coaldrishti.compliance.v1']`). There is no external server, no real database, and simulated GPS/sync. Operates 100% offline-first as an installable PWA.
+
+---
+
+## 1. The Core Platform Story
+
+```
+DETECT → PRIORITIZE → ASSIGN → CORRECT → VERIFY → AUDIT
 ```
 
-Fonts (Barlow Condensed, IBM Plex Sans) are bundled with the app, so the demo works offline.
+| Step | Role | Status | Description |
+| --- | --- | --- | --- |
+| **Detect** | Field Inspector | ✅ Built | Walks work zones, runs interactive checklists, captures evidence photo + metadata |
+| **Prioritize** | AI Engine (Mock) | ✅ Built | Scores risk (XGBoost + SHAP label) to rank severe hazards first |
+| **Assign** | Mine Manager | ✅ Built | Reviews open violations, delegates corrective action, designates supervisor, sets deadline |
+| **Correct** | Field Supervisor | ✅ Built | Carries out remediation, submits verifiable "after" photographic evidence |
+| **Verify** | Verification Center | ✅ Built | **Competitive Differentiator:** Cryptographically validates closure evidence against baseline to prevent fake or gamed compliance |
+| **Audit** | DGMS Inspector | ✅ Built | Immutable, hash-chained chronological audit ledger and statutory report exporter |
 
-## What is built in this phase
+---
 
-| Screen | Route |
-| --- | --- |
-| Role selection (all 7 roles) | `/` |
-| Login, changes with the selected role (switch between all 7 roles) | `/login/:roleId` |
-| Field Inspector dashboard | `/inspector` |
-| Holding page for the other 6 roles | `/workspace/:roleId` |
-| Holding page for inspector screens not built yet | `/inspector/:section` |
+## 2. All 7 Roles Supported
 
-## Demo access
+1. **Field Inspector** (`/inspector`) — ID: `INS-001` · Conducts field inspections, logs violations, and captures baseline evidence.
+2. **Mine Manager** (`/manager`) — ID: `MGR-001` · Assigns corrective actions, sets deadlines, and oversees GIS work zones.
+3. **Supervisor** (`/supervisor`) — ID: `SUP-001` · Receives assigned actions, marks work in progress, and submits closure evidence.
+4. **Verification Center** (`/verification`) · Side-by-side forensic verification, SHA-256 hash checks, GPS proximity checks, and certify/reject actions.
+5. **DGMS Inspector / Auditor** (`/dgms`) — ID: `DGM-001` · Inspects tamper-evident SHA-256 event chains and exports printable statutory compliance dossiers.
+6. **Safety Officer** (`/safety`) — ID: `SAF-001` · Monitors mine-wide safety alerts, hazard clusters, and incident trends.
+7. **Corporate ESG Directorate** (`/corporate`) — ID: `COR-001` · Multi-mine rollup scorecard across Mine A, Mine B, and Mine C.
+8. **Contractor Safety Portal** (`/contractor`) — ID: `CON-001` · Tracks outsourced HEMM machinery, haulage, and PPE actions.
 
-All roles use password `demo123` and the first mine or region in the list.
+*(Password for all demo accounts: `demo123`)*
 
-| Role | ID |
-| --- | --- |
-| Field Inspector | INS-001 |
-| Supervisor | SUP-001 |
-| Safety Officer | SAF-001 |
-| Mine Manager | MGR-001 |
-| Contractor | CON-001 |
-| Corporate | COR-001 |
-| DGMS Inspector | DGM-001 |
+---
 
-The login screen has a "Fill these details" button so nobody types during the demo.
+## 3. End-to-End Walkthrough Demo (5 Minutes)
 
-## Things worth showing
+Experience the complete closed-loop lifecycle from hazard detection to certified audit closure:
 
-- Offline mode chip in the inspector top bar. Open it and press "Simulate reconnect": sync pending drops to 0, the queued Haul Road inspection becomes Submitted, and the Pending submissions KPI goes to 0.
-- KPI numbers are computed from the mock data (`src/data/inspectorMock.js`), so changing the data keeps them consistent.
-- On mobile width the inspector gets a bottom tab bar with a large Start button.
+### Step 1: Detect (Field Inspector)
+1. Log in as **Field Inspector** (`INS-001`).
+2. Tap **Start Inspection**, select **Pit A**, and open the **HEMM / Machinery** checklist.
+3. Mark *Machine guarding in place* as **FAIL**. Select severity **CRITICAL**, attach a photo (or tap *Use a sample image*), and submit the inspection.
+4. Check **My Violations**: the finding is created with `status: 'Open'` and assigned to the Mine Manager.
 
-## Where to change things
+### Step 2: Assign (Mine Manager)
+1. Log out and log in as **Mine Manager** (`MGR-001`).
+2. The newly detected violation appears at the top of the **Unassigned Action Queue** ranked by AI Risk Score.
+3. Click **Assign**, select supervisor **SUP-001 (Rajesh Verma)**, prescribe the corrective action, and pick a target deadline.
+4. Confirm assignment: status immediately updates to `status: 'Assigned'` and a new audit event is logged.
 
-- Product name and copy: `src/config/brand.js`
-- Roles, demo credentials, which roles are built: `src/data/roles.js`
-- Inspector mock data: `src/data/inspectorMock.js`
-- Colours and fonts: `tailwind.config.js`
+### Step 3: Correct (Supervisor)
+1. Log in as **Supervisor** (`SUP-001`).
+2. On your **Remediation Hub**, the assigned violation is waiting under your tasks.
+3. Click **Start Work** → Tap **Mark Task In Progress** (`status: 'In progress'`).
+4. Remediate the issue and upload an after-action photo under **Submit Closure Evidence**, enter resolution notes, and tap **Submit for Verification Review** (`status: 'Awaiting verification'`).
 
-## Next phases (not built yet)
+### Step 4: Verify (Verification Center — The Differentiator)
+1. Open the **Verification Center** (`/verification`).
+2. The submission is queued in the **Pending Verification Queue**. Tap **Inspect & Verify**.
+3. Inspect the **Side-by-Side Comparison**: Field Inspector's before photo vs Supervisor's after photo.
+4. Review the **Automated Anti-Fraud Heuristics** (SHA-256 uniqueness, GPS proximity corroboration, chronological sequence, scene variation index).
+5. Click **Verify & Certify Closure**: status switches to `status: 'Verified'` and closure is certified.
 
-Start inspection, checklist, violation form, AI risk-priority score, Mine Manager dashboard, corrective action, Supervisor dashboard, closure evidence, Verification Center, audit timeline.
+### Step 5: Audit (DGMS Inspector)
+1. Log in as **DGMS Inspector** (`DGM-001`).
+2. Inspect the **DGMS Statutory Compliance Ledger** (`/dgms`) showing 100% intact cryptographic SHA-256 event chains.
+3. Click **Generate Statutory Report** (`/dgms/report`) to view or print the formal statutory safety audit dossier.
+
+---
+
+## 4. Tech Stack & Architecture
+
+- **Frontend:** React 18 + Vite + Tailwind CSS + React Router + Lucide Icons
+- **State & Storage:** Unified `ComplianceStore` backed by `localStorage['coaldrishti.compliance.v1']` with multi-role state mutations and backward compatibility.
+- **PWA:** `vite-plugin-pwa` with service worker, offline app shell, and install prompt.
+- **Cryptography:** Real SHA-256 digest hashing via Web Crypto API with fallback deterministic generator.
+- **Styling:** Design tokens (`coal`, `steel`, `brand`, `ok`, `warn`, `hi`, `danger`) with `Barlow Condensed` and `IBM Plex Sans`.
+
+---
+
+## 5. Development & Build
+
+```bash
+# Install dependencies
+npm install
+
+# Run dev server
+npm run dev
+
+# Production build
+npm run build
+
+# Preview build (test PWA & service worker)
+npm run preview
+```
+
+---
+
+## 6. Honest Prototype Disclaimers
+
+- Sync is simulated; records reside locally in `localStorage`.
+- GPS coordinates are simulated demonstrations of location capture and do not constitute legal proof.
+- SHA-256 hashes provide cryptographic audit trail traceability and anti-tamper detection.
+- AI risk priority scores assist triage decisions; final operational responsibility rests with authorized mining officials.

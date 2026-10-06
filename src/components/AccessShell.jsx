@@ -1,4 +1,5 @@
 import { BRAND } from '../config/brand.js';
+import InstallButton from './InstallButton.jsx';
 import Logo from './Logo.jsx';
 import TopoBackdrop from './TopoBackdrop.jsx';
 
@@ -16,6 +17,9 @@ export default function AccessShell({ panel, mobileExtra, children }) {
           <div>
             <Logo />
             <p className="mt-2 hidden text-sm text-steel-300 lg:block">{BRAND.subtitle}</p>
+            <div className="mt-3 empty:hidden">
+              <InstallButton variant="dark" />
+            </div>
           </div>
           <div className="mt-4 lg:hidden">{mobileExtra}</div>
           <div className="hidden min-h-0 flex-1 flex-col lg:flex">{panel}</div>
