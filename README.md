@@ -111,3 +111,17 @@ npm run preview
 - GPS coordinates are simulated demonstrations of location capture and do not constitute legal proof.
 - SHA-256 hashes provide cryptographic audit trail traceability and anti-tamper detection.
 - AI risk priority scores assist triage decisions; final operational responsibility rests with authorized mining officials.
+
+---
+
+## 7. Team & Credits
+
+Built with ❤️ by our team:
+- **Anurag Kumar**
+- **Agham**
+- **Amarpal**
+- **Pooja**
+- **Sujal**
+- **Ayush**
+- **Arshdeep Kaur**
+
